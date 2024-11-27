@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+
+
+# Python/pybind
+__pycache__/
+*.egg-info
