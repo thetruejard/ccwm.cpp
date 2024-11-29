@@ -33,6 +33,13 @@
 
 
 
+# C/C++
+build/
+
 # Python/pybind
 __pycache__/
 *.egg-info
+
+# GGML
+ggml/src/ggml-vulkan-shaders.hpp
+ggml/src/ggml-vulkan-shaders.cpp

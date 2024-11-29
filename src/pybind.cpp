@@ -8,8 +8,12 @@ class CCWMWrapper : public CCWM {
 public:
 
     CCWMWrapper(
-        const py::object& model_path
-    ) : CCWM(py::str(model_path)) {}
+        const py::object& model_path,
+        bool verbose
+    ) : CCWM(
+        py::str(model_path),
+        verbose
+    ) {}
 
 };
 
@@ -25,7 +29,11 @@ PYBIND11_MODULE(ccwm_cpp, m) {
     )pbdoc";
 
     py::class_<CCWMWrapper>(m, "CCWM")
-        .def(py::init<const py::object&>());
+        .def(
+            py::init<const py::object&, bool>(),
+            py::arg("model_path"),
+            py::arg("verbose") = false
+        );
 
 #ifdef VERSION_INFO
     m.attr("__version__") = MACRO_STRINGIFY(VERSION_INFO);
