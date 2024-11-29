@@ -1,6 +1,7 @@
 import re
 import os
 import sys
+import sysconfig
 import subprocess
 from pathlib import Path
 from setuptools import Extension, setup
@@ -42,6 +43,11 @@ class CMakeBuild(build_ext):
         # Can be set with Conda-Build, for example.
         cmake_generator = os.environ.get("CMAKE_GENERATOR", "")
 
+        # Get the INSTALL PATH (site-packages)
+        # Since we're building dependencies, we need to add the install path
+        # to the module's RPATH when building with cmake.
+        install_dir = sysconfig.get_paths()["purelib"]
+
         # Set Python_EXECUTABLE instead if you use PYBIND11_FINDPYTHON
         # EXAMPLE_VERSION_INFO shows you how to pass a value into the C++ code
         # from Python.
@@ -49,6 +55,7 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}{os.sep}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_BUILD_TYPE={cfg}",  # not used on MSVC, but no harm
+            f"-DINSTALL_DIR={install_dir}",    # set to site-packages path
         ]
         build_args = []
         # Adding CMake arguments set as environment variable

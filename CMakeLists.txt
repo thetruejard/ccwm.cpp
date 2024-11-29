@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.14)
 project("ccwm_cpp" C CXX)
 
+set(INSTALL_DIR "" CACHE STRING "Install directory (e.g. site-packages)")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+set(CMAKE_INSTALL_RPATH "${INSTALL_DIR}")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
