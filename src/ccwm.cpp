@@ -1,8 +1,5 @@
 #include "ccwm.h"
-
 #include <filesystem>
-#include <iostream>
-
 
 
 CCWM::CCWM(
@@ -12,23 +9,25 @@ CCWM::CCWM(
     this->model_path = model_path;
     this->verbose = verbose;
     if (!std::filesystem::exists(model_path)) {
-        throw std::invalid_argument("Could not find model file: \"" + model_path + "\"");
+        throw std::invalid_argument("Model file not found: " + model_path);
     }
 
-    struct ggml_init_params params = {
-        /*.mem_size   =*/ 100,
-        /*.mem_buffer =*/ NULL,
-        /*.no_alloc   =*/ false,
-    };
-    this->context = ggml_init(params);
-
-
-    std::cout << "Printing from C++: " << model_path << std::endl;
+    this->wrapper = std::make_unique<GGMLWrapper>(this->model_path, this->verbose);
 }
 
-CCWM::~CCWM() {
-    std::cout << "CCWM Destructor" << std::endl;
-    ggml_free(this->context);
-    std::cout << "Freed ggml" << std::endl;
+std::string CCWM::get_model_path() {
+    return this->model_path;
+}
+bool CCWM::get_verbose() {
+    return this->verbose;
+}
+void CCWM::set_verbose(bool verbose) {
+    this->verbose = verbose;
+}
+
+const nlohmann::json& CCWM::get_config() {
+    if (this->wrapper)
+        return this->wrapper->get_config();
+    return {};
 }
 

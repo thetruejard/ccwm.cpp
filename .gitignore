@@ -43,3 +43,4 @@ __pycache__/
 # GGML
 ggml/src/ggml-vulkan-shaders.hpp
 ggml/src/ggml-vulkan-shaders.cpp
+*.gguf

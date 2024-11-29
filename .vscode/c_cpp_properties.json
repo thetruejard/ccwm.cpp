@@ -4,11 +4,14 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/ggml/include"
+                "${workspaceFolder}/ggml/include",
+                "${workspaceFolder}/pybind11/include",
+                "${workspaceFolder}/json",
+                "${CONDA_PREFIX}/include/python3.12"
             ],
             "defines": [],
             "cStandard": "c17",
-            "cppStandard": "c++23",
+            "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64"
         }
     ],
