@@ -37,6 +37,9 @@ GGMLWrapper::~GGMLWrapper() {
 const nlohmann::json& GGMLWrapper::get_config() {
     return this->config;
 }
+const std::unordered_map<std::string, ggml_tensor*>& GGMLWrapper::get_tensors() {
+    return this->tensors;
+}
 
 void GGMLWrapper::load_model() {
 
@@ -45,15 +48,6 @@ void GGMLWrapper::load_model() {
         /*.ctx      = */ &this->context,
     };
     this->gguf_ctx = gguf_init_from_file(this->model_path.c_str(), params);
-
-    // kv
-    {
-        const int n_kv = gguf_get_n_kv(this->gguf_ctx);
-        for (int i = 0; i < n_kv; ++i) {
-            const char * key = gguf_get_key(this->gguf_ctx, i);
-            printf("%s: kv[%d]: key = %s\n", __func__, i, key);
-        }
-    }
 
     // tensor info
     {
@@ -97,9 +91,8 @@ void GGMLWrapper::load_model() {
 
     printf("%s: ctx_data size: %zu\n", __func__, ggml_get_mem_size(this->context));
 
-
     this->parse_config();
-
+    this->parse_tensors();
 }
 
 
@@ -127,12 +120,31 @@ void GGMLWrapper::parse_config() {
             case gguf_type::GGUF_TYPE_ARRAY: {
                 this->config[key] = nlohmann::json::array();
                 gguf_type arrt = gguf_get_arr_type(this->gguf_ctx, i);
-                if (arrt != gguf_type::GGUF_TYPE_STRING) {
-                    this->log("Warning: non-string array types are temporarily not supported. Skipping key: %s", key);
-                    continue;
+                if (arrt == gguf_type::GGUF_TYPE_STRING) {
+                    for (int j = 0; j < gguf_get_arr_n(this->gguf_ctx, i); j++) {
+                        this->config[key].push_back(gguf_get_arr_str(this->gguf_ctx, i, j));
+                    }
                 }
-                for (int j = 0; j < gguf_get_arr_n(this->gguf_ctx, i); j++) {
-                    this->config[key].push_back(gguf_get_arr_str(this->gguf_ctx, i, j));
+                else {
+                    const void* data = gguf_get_arr_data(this->gguf_ctx, i);
+                    for (int j = 0; j < gguf_get_arr_n(this->gguf_ctx, i); j++) {
+                        switch (arrt) {
+                            case gguf_type::GGUF_TYPE_UINT8:   this->config[key].push_back(((uint8_t*) data)[j]); break;
+                            case gguf_type::GGUF_TYPE_UINT16:  this->config[key].push_back(((uint16_t*)data)[j]); break;
+                            case gguf_type::GGUF_TYPE_UINT32:  this->config[key].push_back(((uint32_t*)data)[j]); break;
+                            case gguf_type::GGUF_TYPE_UINT64:  this->config[key].push_back(((uint64_t*)data)[j]); break;
+                            case gguf_type::GGUF_TYPE_INT8:    this->config[key].push_back(((int8_t*)  data)[j]); break;
+                            case gguf_type::GGUF_TYPE_INT16:   this->config[key].push_back(((int16_t*) data)[j]); break;
+                            case gguf_type::GGUF_TYPE_INT32:   this->config[key].push_back(((int32_t*) data)[j]); break;
+                            case gguf_type::GGUF_TYPE_INT64:   this->config[key].push_back(((int64_t*) data)[j]); break;
+                            case gguf_type::GGUF_TYPE_FLOAT32: this->config[key].push_back(((float*)   data)[j]); break;
+                            case gguf_type::GGUF_TYPE_FLOAT64: this->config[key].push_back(((double*)  data)[j]); break;
+                            default:
+                                this->log("Warning: unsupported array type found (enum value %d). "
+                                    "Booleans and nested arrays are not supported. Skipping key: %s", (int)t, key);
+                                break;
+                        }
+                    }
                 }
             } break;
         }
@@ -140,4 +152,13 @@ void GGMLWrapper::parse_config() {
 
 }
 
+
+void GGMLWrapper::parse_tensors() {
+    const int num_tensors = gguf_get_n_tensors(this->gguf_ctx);
+    for (int i = 0; i < num_tensors; i++) {
+        const char* name   = gguf_get_tensor_name(this->gguf_ctx, i);
+        ggml_tensor* cur = ggml_get_tensor(this->context, name);
+        this->tensors[std::string(name)] = cur;
+    }
+}
 

@@ -5,6 +5,7 @@ namespace py = pybind11;
 #include "pybind11_json.hpp"
 
 #include "ccwm.h"
+#include "test.h"
 
 class CCWMWrapper : public CCWM {
 public:
@@ -19,15 +20,12 @@ public:
 
 };
 
-PYBIND11_MODULE(ccwm_cpp, m) {
+PYBIND11_MODULE(ccwm_cpp_, m) {
     m.doc() = R"pbdoc(
         CCWM
-        -----------------------
-
-        .. currentmodule:: ccwm_cpp
-
-        .. autosummary::
-           :toctree: _generate
+        Parameters:
+            model_path: path to the gguf checkpoint file to load
+            verbose: whether to log to stdout (default false)
     )pbdoc";
 
     py::class_<CCWMWrapper>(m, "CCWM")
@@ -40,6 +38,16 @@ PYBIND11_MODULE(ccwm_cpp, m) {
         .def_property("verbose", &CCWMWrapper::get_verbose, &CCWMWrapper::set_verbose)
         .def_property_readonly("config", &CCWMWrapper::get_config);
 
+
+    py::class_<Test>(m, "Test")
+        .def(
+            py::init<const py::str&, bool>(),
+            py::arg("model_path"),
+            py::arg("verbose") = false
+        )
+        .def_property_readonly("model_path", &Test::get_model_path)
+        .def_property("verbose", &Test::get_verbose, &Test::set_verbose)
+        .def_property_readonly("config", &Test::get_config);
 
 
 #ifdef VERSION_INFO

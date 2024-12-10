@@ -1,12 +1,20 @@
 
 from gguf import GGUFWriter
 import torch
+import argparse
 
 
 if __name__ == '__main__':
 
-    in_file = '/ccn2/u/jwat2002/ccwm/out/CCWM100M_RGB_CF_alldata_bs512/model_00085000.pt'
-    out_file = './test.gguf'
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--in-file', type=str,
+        default='/ccn2/u/jwat2002/ccwm/out/CCWM100M_RGB_CF_alldata_bs512/model_00085000.pt')
+    parser.add_argument('--out-file', type=str,
+        default='./test.gguf')
+    args = parser.parse_args()
+
+    in_file = args.in_file
+    out_file = args.out_file
 
     model = torch.load(in_file, weights_only=False)
     config = model['cfg']

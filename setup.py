@@ -138,7 +138,8 @@ setup(
     url="https://github.com/thetruejard/ccwm.cpp",
     description="A C++ implementation and Python interface for CCWM",
     long_description="",
-    ext_modules=[CMakeExtension("ccwm_cpp")],
+    packages=['ccwm_cpp'],
+    ext_modules=[CMakeExtension("ccwm_cpp_")],
     #extras_require={"test": "pytest"},
     # Currently, build_ext only provides an optional "highest supported C++
     # level" feature, but in the future it may provide more features.

@@ -13,7 +13,7 @@ file(GLOB_RECURSE sources src/*.cpp src/*.h)
 add_subdirectory(ggml)
 
 add_subdirectory(pybind11)
-pybind11_add_module(ccwm_cpp ${sources})
+pybind11_add_module(ccwm_cpp_ ${sources})
 
-target_include_directories(ccwm_cpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ggml/include ${CMAKE_CURRENT_SOURCE_DIR}/json)
-target_link_libraries(ccwm_cpp PRIVATE ggml)
+target_include_directories(ccwm_cpp_ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ggml/include ${CMAKE_CURRENT_SOURCE_DIR}/json)
+target_link_libraries(ccwm_cpp_ PRIVATE ggml)
